@@ -1,0 +1,81 @@
+# TurnSketch Studio: one host, N GPUs.
+#
+#   docker compose up -d --build                  # GPU 0 only
+#   docker compose --profile gpu1 up -d --build   # GPUs 0 and 1
+#
+# Add one gpu-worker-N block per extra card.
+
+x-worker: &worker
+  build:
+    context: ./backend
+    target: worker
+  env_file: .env
+  environment:
+    TS_REDIS_URL: redis://redis:6379/0
+  volumes:
+    - sessions:/data
+    - models:/models
+  depends_on: [redis]
+  restart: unless-stopped
+
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ./backend
+      target: gateway
+    environment:
+      TS_REDIS_URL: redis://redis:6379/0
+      TS_CORS_ORIGINS: https://${STUDIO_DOMAIN:-turnsketch.studio.lan}
+    volumes:
+      - sessions:/data
+    depends_on: [redis]
+    restart: unless-stopped
+
+  gpu-worker-0:
+    <<: *worker
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]
+
+  gpu-worker-1:
+    <<: *worker
+    profiles: [gpu1]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["1"]
+              capabilities: [gpu]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE: ""
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports: ["80:80", "443:443"]
+    environment:
+      STUDIO_DOMAIN: ${STUDIO_DOMAIN:-turnsketch.studio.lan}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [gateway, frontend]
+    restart: unless-stopped
+
+volumes:
+  sessions:
+  models:
+  caddy-data:

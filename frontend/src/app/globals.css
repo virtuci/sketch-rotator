@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+  background: #0d0e11;
+  color: #e6e8ec;
+}
+
+/* Checkerboard behind transparent layers. */
+.checker {
+  background-color: #2a2d34;
+  background-image: linear-gradient(45deg, #31353d 25%, transparent 25%),
+    linear-gradient(-45deg, #31353d 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #31353d 75%),
+    linear-gradient(-45deg, transparent 75%, #31353d 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+input[type="range"] {
+  accent-color: #5b8cff;
+}

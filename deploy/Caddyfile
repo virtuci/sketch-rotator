@@ -1,0 +1,13 @@
+{$STUDIO_DOMAIN:turnsketch.studio.lan} {
+	# Certificate from Caddy's internal CA. Browsers only allow clipboard
+	# writes on HTTPS, so the studio must not be served over plain HTTP.
+	tls internal
+
+	@gateway path /api/* /files/*
+	reverse_proxy @gateway gateway:8000
+	reverse_proxy frontend:3000
+
+	request_body {
+		max_size 256MB
+	}
+}

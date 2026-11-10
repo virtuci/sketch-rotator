@@ -1,0 +1,9 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.venv/
+__pycache__/
+.pytest_cache/
+data/
+.env

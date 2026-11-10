@@ -1,0 +1,31 @@
+[project]
+name = "turnsketch-backend"
+version = "0.1.0"
+description = "TurnSketch Studio API gateway and GPU worker"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",
+    "pydantic>=2.7",
+    "numpy>=1.26",
+    "opencv-python-headless>=4.9",
+    "scipy>=1.11",
+]
+
+[project.optional-dependencies]
+queue = ["celery>=5.4", "redis>=5.0"]
+# Learned models for the GPU worker. Hunyuan3D-2 (hy3dgen) and SAM-2 (sam2)
+# are installed from their repositories; see backend/Dockerfile.
+ml = ["torch>=2.3", "diffusers>=0.31", "transformers>=4.45", "accelerate>=0.34", "pillow>=10"]
+dev = ["pytest>=8", "httpx>=0.27", "websockets>=12"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
